@@ -1,0 +1,40 @@
+{
+  "manifest_version": 2,
+  "id": "org.mai-mai.expenses-summary",
+  "version": "1.2.0",
+  "name": "今日模型花费总结",
+  "description": "统计当天模型调用次数、token 消耗、回复量和回复成本，生成财报图片并合并转发到聊天。支持 /expenses、/今日财报 命令即时查询，可被 LLM 作为工具主动调用，支持定时推送。",
+  "author": {
+    "name": "orge-8",
+    "url": "https://github.com/orge-8"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/orge-8/expenses-summary",
+    "issues": "https://github.com/orge-8/expenses-summary/issues"
+  },
+  "host_application": {
+    "min_version": "1.0.9",
+    "max_version": "1.99.99"
+  },
+  "sdk": {
+    "min_version": "2.6.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [],
+  "capabilities": [
+    "send.text",
+    "send.image",
+    "send.forward",
+    "chat.get_stream_by_group_id",
+    "chat.get_stream_by_user_id",
+    "chat.open_session",
+    "render.html2png",
+    "statistics.local.model_trend",
+    "statistics.local.message_trend",
+    "statistics.local.token_trend"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN"
+  }
+}
