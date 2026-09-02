@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "id": "org.mai-mai.expenses-summary",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "name": "今日模型花费总结",
   "description": "统计当天模型调用次数、token 消耗、回复量和回复成本，生成财报图片并合并转发到聊天。支持 /expenses、/今日财报 命令即时查询，可被 LLM 作为工具主动调用，支持定时推送。",
   "author": {

@@ -21,6 +21,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
+from pydantic import field_validator
+
 from maibot_sdk import Command, Field, MaiBotPlugin, PluginConfigBase, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -298,6 +300,28 @@ def make_forward_node(segment_type: str, content: str) -> dict:
 # ---------- 配置模型 ----------
 
 
+def coerce_id_list(value: Any) -> Any:
+    """宽容解析 ID 列表字段。
+
+    用户在 config.toml 里常把列表写成单个字符串（admins = "12345"）、
+    逗号/分号分隔字符串（"123,456"）甚至整数, 这里统一归一化为字符串列表,
+    避免 pydantic 直接 E_BAD_PAYLOAD 拒载整份配置。
+    """
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple, set)):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, (str, int, float)):
+        text = str(value).strip()
+        if not text:
+            return []
+        # 统一分隔符: 中文逗号/英文逗号/中英分号/空白 全部归一为分号后切分
+        for sep in ("，", ",", "；", " ", "\t"):
+            text = text.replace(sep, ";")
+        return [p.strip() for p in text.split(";") if p.strip()]
+    return value
+
+
 class PluginSection(PluginConfigBase):
     __ui_label__ = "插件设置"
 
@@ -322,6 +346,11 @@ class PermissionSection(PluginConfigBase):
     query_admin_only: bool = Field(default=False, description="查询命令仅管理员可用")
     admins: list = Field(default_factory=list, description="管理员 QQ 号列表")
 
+    @field_validator("admins", mode="before")
+    @classmethod
+    def _normalize_admins(cls, value: Any) -> Any:
+        return coerce_id_list(value)
+
 
 class SchedulerSection(PluginConfigBase):
     __ui_label__ = "定时发送"
@@ -330,6 +359,11 @@ class SchedulerSection(PluginConfigBase):
     time: str = Field(default="23:30", description="定时发送时间（HH:MM）")
     group_ids: list = Field(default_factory=list, description="定时推送的 QQ 群号列表")
     private_ids: list = Field(default_factory=list, description="定时推送的私聊 QQ 号列表")
+
+    @field_validator("group_ids", "private_ids", mode="before")
+    @classmethod
+    def _normalize_ids(cls, value: Any) -> Any:
+        return coerce_id_list(value)
 
 
 class ExpensesSummaryConfig(PluginConfigBase):
